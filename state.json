@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "savedAt": "2026-11-27T07:07:35.496Z",
+  "lang": "zh",
+  "width": "desktop",
+  "selections": {
+    "home-hero": "v2",
+    "home-heatpath": "v2",
+    "home-structure": "v2",
+    "home-data": "v2",
+    "home-compare": "v3",
+    "home-contact": "v6",
+    "footer": "v1",
+    "tech-bond": "v6",
+    "tech-flow": "v6",
+    "tech-system": "v6",
+    "tech-closing": "v2",
+    "tech-cover": "v6",
+    "tech-package": "v2",
+    "tech-demo": "v5"
+  },
+  "order": {
+    "home": [
+      "home-hero",
+      "home-heatpath",
+      "home-structure",
+      "home-data",
+      "home-compare",
+      "home-contact"
+    ],
+    "technology": [
+      "tech-cover",
+      "tech-bond",
+      "tech-flow",
+      "tech-package",
+      "tech-system",
+      "tech-demo",
+      "tech-closing"
+    ]
+  },
+  "overrides": {},
+  "notes": {
+    "v2/technology/tech-closing": {
+      "text": "換個標題 簡短一點 按鈕位置調整排版",
+      "createdAt": "2026-11-27T07:04:26.105Z",
+      "updatedAt": "2026-11-27T07:04:40.781Z",
+      "status": "open"
+    },
+    "v2/home/home-heatpath": {
+      "text": "少了兩層 散熱得更快",
+      "createdAt": "2026-11-27T07:05:07.665Z",
+      "updatedAt": "2026-11-27T07:05:20.268Z",
+      "status": "open"
+    },
+    "v3/home/home-compare": {
+      "text": "我其他都是黑色 所以幫我拼起來 這頁也改成黑色",
+      "createdAt": "2026-11-27T07:05:33.555Z",
+      "updatedAt": "2026-11-27T07:05:44.820Z",
+      "status": "open"
+    },
+    "v2/technology/tech-package": {
+      "text": "換個呈現方式 我司的在上 傳統散熱再下 \n",
+      "createdAt": "2026-11-27T07:06:46.902Z",
+      "updatedAt": "2026-11-27T07:07:08.793Z",
+      "status": "open"
+    }
+  }
+}
