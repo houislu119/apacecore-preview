@@ -18,6 +18,7 @@
   var keepSel = typeof entry === 'string' ? null : entry[1]; // layout placeholders: kept in the layout, invisible
   var embed = q.get('embed') === '1';
   var chrome = q.get('chrome') === '1';
+  var lite = q.get('lite') === '1'; // small preview cards on a phone: no video, no WebGL
   var root = document.documentElement;
   root.setAttribute('data-only', id);
 
@@ -61,11 +62,39 @@
   HTMLCanvasElement.prototype.getContext = function (type) {
     if (/webgl/.test(String(type))) {
       find();
-      var ok = true;
-      try { ok = !!target && (target.matches(GL) || !!target.querySelector(GL)); } catch (e) {}
+      var ok = !lite;
+      try { ok = ok && !!target && (target.matches(GL) || !!target.querySelector(GL)); } catch (e) {}
       if (!ok) return null;
     }
     return getContext.apply(this, arguments);
+  };
+
+  // Video: pages start their hero video whatever section is shown (0.7-1.5 MB each). In only-mode a video
+  // loads only if it is inside the shown section; with lite=1, never (its poster stays).
+  function mediaOff(el) {
+    if (lite) return true;
+    find();
+    return !target || !target.contains(el);
+  }
+  var MP = HTMLMediaElement.prototype;
+  var srcDesc = Object.getOwnPropertyDescriptor(MP, 'src');
+  if (srcDesc && srcDesc.set) {
+    Object.defineProperty(MP, 'src', {
+      configurable: true,
+      enumerable: srcDesc.enumerable,
+      get: srcDesc.get,
+      set: function (v) { if (!mediaOff(this)) srcDesc.set.call(this, v); },
+    });
+  }
+  var mLoad = MP.load;
+  var mPlay = MP.play;
+  MP.load = function () { if (!mediaOff(this)) return mLoad.apply(this, arguments); };
+  MP.play = function () { return mediaOff(this) ? Promise.resolve() : mPlay.apply(this, arguments); };
+  var sAppend = Node.prototype.appendChild;
+  Node.prototype.appendChild = function (c) {
+    // <source> added to a switched-off video would start a download
+    if (this instanceof HTMLMediaElement && c && c.nodeName === 'SOURCE' && mediaOff(this)) return c;
+    return sAppend.apply(this, arguments);
   };
 
   var framed = window.parent !== window;
