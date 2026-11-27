@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "savedAt": "2026-11-27T12:26:43.514Z",
+  "savedAt": "2026-11-27T12:26:47.564Z",
   "lang": "zh",
   "width": "mobile",
   "selections": {
@@ -64,9 +64,9 @@
       "status": "open"
     },
     "v6/technology/tech-bond": {
-      "text": "圖這樣呈現可以改",
+      "text": "圖這樣",
       "createdAt": "2026-11-27T12:26:03.950Z",
-      "updatedAt": "2026-11-27T12:26:43.381Z",
+      "updatedAt": "2026-11-27T12:26:47.564Z",
       "status": "open"
     }
   }
