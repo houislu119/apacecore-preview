@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "savedAt": "2026-11-27T07:07:35.496Z",
+  "savedAt": "2026-11-27T12:19:17.054Z",
   "lang": "zh",
   "width": "desktop",
   "selections": {
@@ -16,8 +16,7 @@
     "tech-system": "v6",
     "tech-closing": "v2",
     "tech-cover": "v6",
-    "tech-package": "v2",
-    "tech-demo": "v5"
+    "tech-package": "v2"
   },
   "order": {
     "home": [
