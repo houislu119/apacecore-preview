@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-Hant-TW" class="vb" data-astro-cid-ntxgdrii><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>按鈕互動比較｜Apacecore v2</title><link rel="stylesheet" href="/apacecore-preview/_astro/global.C7Wz09NJ.css"><link rel="stylesheet" href="/apacecore-preview/_astro/v2-buttons.CNsNWA8N.css"><script>/* Review tool: ?only=<sectionId> support. Injected into every page <head> by src/review/integration.mjs.
+   Does nothing unless the URL has ?only=. No visual effect on normal page views.
+   ?only=<id>    show only that section (selector comes from src/review/manifest.json, falls back to #id)
+   &embed=1      inside the composed preview: hide scrollbars, hand wheel scrolling to the parent page
+   &chrome=1     transparent page background (used for the header overlay) */
+(function () {
+  var q;
+  try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  var id = q.get('only');
+  if (!id) return;
+  var MAP = {"/":{"header":"header.site-head","hero":"main section.hero","heatpath":"#heatpath","structure":"#structure","numbers":"#numbers","compare":"#compare","contact":"#contact","footer":"footer.site-foot"},"/v2":{"header":"header.hd","hero":"main section.hero","heatpath":"#heatpath","structure":"#structure","numbers":"#numbers","compare":"#compare","contact":"#contact","footer":"footer.ft"},"/v2/technology":{"header":"header.hd","cover":"main section.th","bond":"#bond","flow":"#flow","package":"#package","system":"#system","closing":"main section.cl"},"/v3":{"header":"header.nav","hero":"#top","heatpath":"#heatpath","structure":"#structure","numbers":"#numbers","compare":"#compare","contact":"#contact","footer":"footer.ft"},"/v4":{"header":"header.hd","hero":"main section.hero","heatpath":"#heatpath","structure":"#structure","numbers":"#numbers","compare":"#compare","contact":"#contact","footer":"footer.ft"},"/v5/technology":{"header":"header.hd","cover":"main section.hx","structure":["#structure","nav.rail"],"flow":["#flow","nav.rail"],"package":["#package","nav.rail"],"system":["#system","nav.rail"],"demo":["#demo","nav.rail"],"closing":"main section.end"},"/v6":{"header":"header.hd","hero":"main section.hero","heatpath":"#heatpath","structure":"#structure","numbers":"#numbers","compare":"#compare","contact":"#contact","footer":"footer.ft"},"/v6/technology":{"header":"header.hd","cover":"main section.hx","structure":"#structure","flow":"#flow","package":"#package","system":"#system","closing":"main section.en"}};
+  var norm = location.pathname.replace(/index\.html$/, '').replace(/\/+$/, '').replace(/\/en(?=\/|$)/, '');
+  var best = '/';
+  for (var r in MAP) if (r !== '/' && norm.slice(-r.length) === r && r.length > best.length) best = r;
+  var entry = (MAP[best] || {})[id] || '#' + (window.CSS && CSS.escape ? CSS.escape(id) : id);
+  var sel = typeof entry === 'string' ? entry : entry[0];
+  var keepSel = typeof entry === 'string' ? null : entry[1]; // layout placeholders: kept in the layout, invisible
+  var embed = q.get('embed') === '1';
+  var chrome = q.get('chrome') === '1';
+  var root = document.documentElement;
+  root.setAttribute('data-only', id);
+
+  var css =
+    'html[data-only] body *:not([data-only-target]):not(:has([data-only-target])):not([data-only-target] *):not([data-only-keep]):not([data-only-keep] *){display:none!important}' +
+    '[data-only-keep]{visibility:hidden!important}';
+  // an isolated section starts at the top: drop offsets its wrappers apply for the sections before it
+  css += 'html[data-only] body :has([data-only-target]){margin-top:0!important}';
+  if (embed) css += 'html{scroll-behavior:auto!important;scrollbar-width:none!important}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important}';
+  if (chrome) css += 'html,body{background:transparent!important}';
+  var st = document.createElement('style');
+  st.setAttribute('data-only-style', '');
+  st.textContent = css;
+  document.head.appendChild(st);
+
+  var target = null;
+  function find() {
+    if (target) return true;
+    var el = null;
+    try { el = document.querySelector(sel); } catch (e) {}
+    if (!el) return false;
+    target = el;
+    el.setAttribute('data-only-target', id);
+    return true;
+  }
+  function keep() {
+    if (!keepSel) return;
+    try {
+      var list = document.querySelectorAll(keepSel);
+      for (var i = 0; i < list.length; i++) list[i].setAttribute('data-only-keep', '');
+    } catch (e) {}
+  }
+  var mo = new MutationObserver(function () { keep(); if (find() && !keepSel) mo.disconnect(); });
+  mo.observe(root, { childList: true, subtree: true });
+
+  // 3D: every page builds its WebGL scenes even when their section is hidden, and a browser allows only ~16
+  // contexts. In only-mode, WebGL is available only if this section contains a 3D host (manifest "glHosts");
+  // elsewhere the pages take their own no-WebGL fallback.
+  var GL = ".xp3d, .hp3d, [data-st-host], [data-t3]";
+  var getContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (type) {
+    if (/webgl/.test(String(type))) {
+      find();
+      var ok = true;
+      try { ok = !!target && (target.matches(GL) || !!target.querySelector(GL)); } catch (e) {}
+      if (!ok) return null;
+    }
+    return getContext.apply(this, arguments);
+  };
+
+  var framed = window.parent !== window;
+  var last = '';
+  function report() {
+    if (!framed || !target) return;
+    var r = target.getBoundingClientRect();
+    var sy = window.scrollY || 0;
+    var docH = root.scrollHeight;
+    var bottom = Math.ceil(r.bottom + sy);
+    var h = docH > window.innerHeight + 1 ? docH : bottom;
+    var key = h + ':' + bottom;
+    if (key === last) return;
+    last = key;
+    window.parent.postMessage({ type: 'apc-only', id: id, path: location.pathname, height: h, targetHeight: Math.ceil(r.height) }, location.origin);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    mo.disconnect();
+    keep();
+    if (!find()) {
+      var miss = document.createElement('p');
+      miss.setAttribute('data-only-target', id);
+      miss.style.cssText = 'margin:0;padding:24px;font:14px/1.5 monospace;color:#888';
+      miss.textContent = 'review: section "' + id + '" (' + sel + ') not found on ' + location.pathname;
+      document.body.appendChild(miss);
+      target = miss;
+    }
+    if (parseFloat(getComputedStyle(target).marginTop) < 0) target.style.setProperty('margin-top', '0', 'important');
+    if (!framed) return;
+    report();
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(report);
+      ro.observe(document.body);
+      ro.observe(target);
+    }
+    window.addEventListener('load', function () { report(); setTimeout(report, 600); setTimeout(report, 2000); });
+  });
+
+  if (embed && framed) {
+    window.addEventListener(
+      'wheel',
+      function (e) {
+        if (e.ctrlKey) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
+        window.parent.postMessage({ type: 'apc-wheel', dy: dy }, location.origin);
+      },
+      { passive: false, capture: true }
+    );
+  }
+})();
+</script></head><body data-astro-cid-ntxgdrii><main class="wrap" data-astro-cid-ntxgdrii><header class="top" data-astro-cid-ntxgdrii><h1 data-astro-cid-ntxgdrii>按鈕互動比較</h1><p data-astro-cid-ntxgdrii>三個方案套在 /v2 的「聯絡我們」與「了解技術」。可以直接滑過、按住、點擊，或用 Tab 鍵看鍵盤焦點。選定後再套用到 /v2。</p></header><section class="row now" data-astro-cid-ntxgdrii><div class="meta" data-astro-cid-ntxgdrii><h2 data-astro-cid-ntxgdrii>目前的 /v2</h2><p class="ref" data-astro-cid-ntxgdrii>純色方塊，滑過只變色。</p></div><div class="stage" data-astro-cid-ntxgdrii><a class="btn0 btn0-solid" href="#" data-astro-cid-ntxgdrii>聯絡我們</a><a class="btn0 btn0-line" href="#" data-astro-cid-ntxgdrii>了解技術</a></div></section><section class="row" data-astro-cid-ntxgdrii><div class="meta" data-astro-cid-ntxgdrii><h2 data-astro-cid-ntxgdrii>方案 A　按鍵行程</h2><p class="ref" data-astro-cid-ntxgdrii><span data-astro-cid-ntxgdrii>參考</span>UI Moments「點擊反饋」的按鈕外觀（Micron 示例的浮雕按鈕）：底部一道實體邊，按下時邊收起、按鈕下沉</p><ul data-astro-cid-ntxgdrii><li data-astro-cid-ntxgdrii>去掉漸層、12px 圓角與柔和陰影，改成 2px 直角、純色加 3px 深藍底邊</li><li data-astro-cid-ntxgdrii>拿掉 Micron 的彈跳動畫，只保留「按下去、放開回來」的行程</li><li data-astro-cid-ntxgdrii>按下 80ms、放開 160ms，像機械鍵盤</li></ul></div><div class="stage stage-a" data-astro-cid-ntxgdrii><a class="ba ba-solid" href="#" data-astro-cid-ntxgdrii><span class="lbl" data-astro-cid-ntxgdrii>聯絡我們</span></a><a class="ba ba-line" href="#" data-astro-cid-ntxgdrii><span class="lbl" data-astro-cid-ntxgdrii>了解技術</span></a></div></section><section class="row" data-astro-cid-ntxgdrii><div class="meta" data-astro-cid-ntxgdrii><h2 data-astro-cid-ntxgdrii>方案 B　方向填色</h2><p class="ref" data-astro-cid-ntxgdrii><span data-astro-cid-ntxgdrii>參考</span>UI Moments「對齊撥片」的滑塊：滑塊依移動方向決定錨點（transform-origin），從出發那一側展開</p><ul data-astro-cid-ntxgdrii><li data-astro-cid-ntxgdrii>原本的擠壓變形（1.44 × 0.83）與彈簧曲線全部拿掉，改成無回彈的 220ms</li><li data-astro-cid-ntxgdrii>用在 hover：游標從哪一側進入，藍色就從哪一側填滿；離開時往游標離開的方向收走</li><li data-astro-cid-ntxgdrii>次要按鈕改成底線，從進入那一側畫出</li></ul></div><div class="stage stage-b" data-astro-cid-ntxgdrii><a class="bb bb-solid" href="#" data-dir data-astro-cid-ntxgdrii><span class="fill" aria-hidden="true" data-astro-cid-ntxgdrii></span><span class="lbl" data-astro-cid-ntxgdrii>聯絡我們</span></a><a class="bb bb-line" href="#" data-dir data-astro-cid-ntxgdrii><span class="lbl" data-astro-cid-ntxgdrii>了解技術</span></a></div></section><section class="row" data-astro-cid-ntxgdrii><div class="meta" data-astro-cid-ntxgdrii><h2 data-astro-cid-ntxgdrii>方案 C　掃描線</h2><p class="ref" data-astro-cid-ntxgdrii><span data-astro-cid-ntxgdrii>參考</span>UI Moments 原創載入動效「列掃」：一條掃描頭沿內容掃過，經過的地方被點亮</p><ul data-astro-cid-ntxgdrii><li data-astro-cid-ntxgdrii>從無限循環改成 hover 時只掃一次（260ms），掃過後停在亮的狀態</li><li data-astro-cid-ntxgdrii>主要按鈕：一條 1px 亮線橫掃，後方按鈕變亮</li><li data-astro-cid-ntxgdrii>次要按鈕：只有底框上一段亮線從左掃到右；點擊時亮度短暫下壓 100ms</li></ul></div><div class="stage stage-c" data-astro-cid-ntxgdrii><a class="bc bc-solid" href="#" data-astro-cid-ntxgdrii><span class="scan" aria-hidden="true" data-astro-cid-ntxgdrii></span><span class="lbl" data-astro-cid-ntxgdrii>聯絡我們</span></a><a class="bc bc-line" href="#" data-astro-cid-ntxgdrii><span class="scan" aria-hidden="true" data-astro-cid-ntxgdrii></span><span class="lbl" data-astro-cid-ntxgdrii>了解技術</span></a></div></section><p class="foot" data-astro-cid-ntxgdrii>靈感來源：UI Moments（MIT，© 2026 guanmo-ai）。三個方案都是參考做法後自行重寫，沒有複製原始碼。詳見 docs/third-party/ui-moments.md。</p></main><script type="module">document.querySelectorAll(`.stage a`).forEach(e=>e.addEventListener(`click`,e=>e.preventDefault())),document.querySelectorAll(`[data-dir]`).forEach(e=>{let t=t=>{let n=e.getBoundingClientRect();return t.clientX-n.left<n.width/2?`l`:`r`};e.addEventListener(`pointerenter`,n=>{e.style.setProperty(`--o`,t(n)===`l`?`0%`:`100%`),e.classList.add(`on`)}),e.addEventListener(`pointerleave`,n=>{e.style.setProperty(`--o`,t(n)===`l`?`0%`:`100%`),e.classList.remove(`on`)}),e.addEventListener(`focus`,()=>{e.style.setProperty(`--o`,`0%`),e.classList.add(`on`)}),e.addEventListener(`blur`,()=>e.classList.remove(`on`))}),document.querySelectorAll(`.bc`).forEach(e=>{let t=()=>{e.classList.remove(`sweep`),e.offsetWidth,e.classList.add(`sweep`)};e.addEventListener(`pointerenter`,t),e.addEventListener(`focus`,()=>e.matches(`:focus-visible`)&&t()),e.addEventListener(`pointerleave`,()=>e.classList.remove(`sweep`)),e.addEventListener(`blur`,()=>e.classList.remove(`sweep`))});</script></body></html>
