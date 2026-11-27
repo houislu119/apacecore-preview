@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "savedAt": "2026-11-27T12:27:03.970Z",
+  "savedAt": "2026-11-27T12:27:09.328Z",
   "lang": "zh",
   "width": "mobile",
   "selections": {
@@ -61,12 +61,6 @@
       "text": "換個呈現方式 我司的在上 傳統散熱再下 \n",
       "createdAt": "2026-11-27T07:06:46.902Z",
       "updatedAt": "2026-11-27T07:07:08.793Z",
-      "status": "open"
-    },
-    "v6/technology/tech-bond": {
-      "text": "圖可以",
-      "createdAt": "2026-11-27T12:26:03.950Z",
-      "updatedAt": "2026-11-27T12:27:03.970Z",
       "status": "open"
     }
   }
